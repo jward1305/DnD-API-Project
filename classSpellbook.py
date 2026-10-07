@@ -1,7 +1,7 @@
 import requests
 import pickle
 from classClasses import non_caster, prepared_caster
-from classSpells import display_spell_details, cantrip_exists, spell_exists
+from classSpells import display_spell_details, cantrip_exists, spell_exists, check_spell_class
 from API import api_2024_request, name_to_index
 
 def spellbook_details(spellbook, character_name): #Displays general details on a spellbook.
@@ -57,17 +57,16 @@ def view_prepared_spells(spellbook, character_name): #Displays any prepared spel
 def add_cantrip(spellbook): #Attempts to add a cantrip to a spellbook
     cantrip_name = input("Enter the name of the cantrip to add:\n").capitalize()
     if cantrip_exists(cantrip_name):
-        if cantrip_name in spellbook['cantrips']:
-            print(f"{cantrip_name} is already in the spellbook.")
-            
-        elif len(spellbook['cantrips']) >= spellbook['cantripsknown']:
-            print(f"You have already added the maximum number of cantrips ({spellbook['cantripsknown']}).")
-            
-        else:
-            spellbook['cantrips'].append(cantrip_name)
-            input(f"{cantrip_name.capitalize()} added! Press Enter to continue.")
-    else:
-        print(f"{cantrip_name} is not a valid cantrip name.")
+        if check_spell_class(spellbook["class"], cantrip_name):
+            if cantrip_name in spellbook['cantrips']:
+                print(f"{cantrip_name} is already in the spellbook.")
+                
+            elif len(spellbook['cantrips']) >= spellbook['cantripsknown']:
+                print(f"You have already added the maximum number of cantrips ({spellbook['cantripsknown']}).")
+                
+            else:
+                spellbook['cantrips'].append(cantrip_name)
+                input(f"{cantrip_name.capitalize()} added! Press Enter to continue.")
     return spellbook
 
 def learn_spell(spellbook, spell_data): #Adding spells for non-prepared casters.
@@ -105,12 +104,13 @@ def prepare_spell(spellbook, spell_data): #Adding spells for prepared casters.
 def add_spell(spellbook): #Attempts to add a spell to a spellbook. If the class is a prepared caster, it will attempt to prepare the spell instead.
     spell_name = input("Enter the name of the spell to add:\n").capitalize()
     if spell_exists(spell_name):
-        spell_index = name_to_index(spell_name)
-        spell_data = api_2024_request(f"spells/{spell_index}")
-        if spellbook["isprepared"]:
-            spellbook = prepare_spell(spellbook, spell_data)
-        else:
-            spellbook = learn_spell(spellbook, spell_data)
+        if check_spell_class(spellbook["class"], spell_name):
+            spell_index = name_to_index(spell_name)
+            spell_data = api_2024_request(f"spells/{spell_index}")
+            if spellbook["isprepared"]:
+                spellbook = prepare_spell(spellbook, spell_data)
+            else:
+                spellbook = learn_spell(spellbook, spell_data)
     return spellbook
 
 def remove_cantrip(spellbook): #Attempts to remove a cantrip from a spellbook

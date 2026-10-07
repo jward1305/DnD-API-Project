@@ -66,3 +66,13 @@ def spell_exists(spell_name): #Checks if a spell exists in the API and returns T
         print(f"{spell_name} is a cantrip, not a spell.")
         return False
     return True
+
+def check_spell_class(pClass, spell):
+    spell_index = name_to_index(spell)
+    spell_data = api_2024_request(f"spells/{spell_index}")
+    validClasses = {c['index'] for c in spell_data['classes']}
+    if pClass in validClasses:
+        return True
+    else:
+        print(f"{spell.capitalize()} is not available to the {pClass.capitalize()} class.")
+        return False
