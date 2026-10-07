@@ -57,8 +57,11 @@ def character_menu(chosen_classes, character_name):
             for c in chosen_classes:
                 i += 1
                 print(f"{i}- {c.name.capitalize()}")
-            selected_class = int(input("Select a class to view spell details:\n"))
-            view_available_spells(chosen_classes[selected_class - 1])
+            try:
+                selected_class = int(input("Select a class to view spell details:\n"))
+                view_available_spells(chosen_classes[selected_class - 1])
+            except:
+                print("Invalid input.")
         elif selected_option == '2':
             search_spell()
         elif selected_option == '3':
